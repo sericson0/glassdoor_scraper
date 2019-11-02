@@ -19,14 +19,15 @@ import datetime as dt
 #Inputs
 #page url is the ***Review*** page of the company. 
 #******DO NOT INCLUDE the .htm**************
-page_url = "https://www.glassdoor.com/Reviews/Wells-Fargo-Reviews-E8876" #do not include the .htm
-#csv_file_name is csv where outputs will be saved to. Is from relative path of code  
-csv_file_name = '../Output CSV/wells_fargo_reviews.csv'
+csv_save_folder = "../Output CSV/"
+company_name_list = ["Wells Fargo", "Apple", "Ford Motor Company"]
+#Number at the end of the reviews page. May be a way to automate this but will leave that to your own time
+company_number_list = ["E8876", "E1138", "E263"]
 #Limit is number of reviews to load (code is currently not robust to end point so limit needs to be smaller than the total number of reviews)
-LIMIT = 50
+LIMIT = 5
 #Your glassdoor username and password
-USERNAME = ''
-PASSWORD = ''
+USERNAME = 'sericson0@gmail.com'
+PASSWORD = 'Donth@ck1'
 #headless means the web browser wont ope up
 HEADLESS = True
 #_______________________________________________________________________________________________________________________________________
@@ -34,10 +35,15 @@ HEADLESS = True
 #_______________________________________________________________________________________________________________________________________
 if PASSWORD == '': 
 	print("You need to input a username and password into the code")
-start = time.time()
 
-args = argparse.Namespace(credentials=None, file=csv_file_name, headless=HEADLESS, limit=LIMIT, max_date=None, min_date=None, password=PASSWORD,
-                 start_from_url=True, url= page_url, username=USERNAME)
+
+
+
+
+
+
+args = argparse.Namespace(credentials=None, headless=HEADLESS, limit=LIMIT, max_date=None, min_date=None, password=PASSWORD,
+                 start_from_url=True, username=USERNAME)
 
 
 logger = logging.getLogger(__name__)
@@ -258,11 +264,10 @@ def extract_from_page():
 
 
 
-def go_to_next_page():
+def go_to_next_page(url):
     page[0] = page[0] + 1
     # logger.info(f'Going to page {page[0]}')   
-    url = args.url + "_P"+str(page[0])+".htm"
-    browser.get(url)
+    browser.get(url+"_P"+str(page[0])+".htm")
     time.sleep(1)
 
 
@@ -296,39 +301,46 @@ def get_browser():
     return browser
 
 
-browser = get_browser()
-page = [1]
-idx = [0]
-date_limit_reached = [False]
 
 
-def main():
-    logger.info(f'Scraping up to {args.limit} reviews.')
+def get_company_reviews(company_name, company_number, csv_file_name):
+    page[0] = 1
+    idx[0] = 0
+    start = time.time()
+    logger.info(f'Scraping up to {args.limit} reviews for {company_name}.')
 
     res = pd.DataFrame([], columns=SCHEMA)
 
-    sign_in()
 
-  
-    url = args.url + ".htm"
-    browser.get(url)
-    logger.info(f'Starting from page {page[0]:,}.')
+
+    url = "https://www.glassdoor.com/Reviews/"+company_name.replace(" ","-")+"-Reviews-"+company_number
+    browser.get(url+".htm")
     time.sleep(1)
 
     reviews_df = extract_from_page()
     res = res.append(reviews_df)
 
-  
+
     while len(res) < args.limit:
-        go_to_next_page()
+        go_to_next_page(url)
         reviews_df = extract_from_page()
         res = res.append(reviews_df)
 
-    logger.info(f'Writing {len(res)} reviews to file {args.file}')
-    res.to_csv(args.file, index=False, encoding='utf-8')
+    res.to_csv(csv_file_name, index=False, encoding='utf-8')
 
     end = time.time()
     logger.info(f'Finished in {end - start} seconds')
 
+def get_all_company_reviews(company_name_list, company_number_list, csv_save_folder):
+    csv_file_names = [csv_save_folder + company_name + ".csv" for company_name in company_name_list] 
 
-main()
+    sign_in()
+    for i in range(len(company_name_list)):
+    	get_company_reviews(company_name_list[i], company_number_list[i], csv_file_names[i])
+    logger.info(f'finished running code!!!')
+
+
+page = [1]
+idx = [0]
+browser = get_browser()
+get_all_company_reviews(company_name_list, company_number_list, csv_save_folder)
