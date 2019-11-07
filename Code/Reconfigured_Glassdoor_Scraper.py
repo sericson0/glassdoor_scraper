@@ -26,8 +26,8 @@ company_number_list = ["E8876", "E1138", "E263"]
 #Limit is number of reviews to load (code is currently not robust to end point so limit needs to be smaller than the total number of reviews)
 LIMIT = 5
 #Your glassdoor username and password
-USERNAME = 'sericson0@gmail.com'
-PASSWORD = 'Donth@ck1'
+USERNAME = ''
+PASSWORD = ''
 #headless means the web browser wont ope up
 HEADLESS = True
 #_______________________________________________________________________________________________________________________________________
@@ -35,10 +35,6 @@ HEADLESS = True
 #_______________________________________________________________________________________________________________________________________
 if PASSWORD == '': 
 	print("You need to input a username and password into the code")
-
-
-
-
 
 
 
