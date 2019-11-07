@@ -18,5 +18,11 @@ Change Limit to number of reviews you would like to scrape. (Code will currently
 
 Set company names along with the number (along with the E) for the glassdoor review urls for each company you want to scrape      
 
-
+Can sort data by SORT_OPTION
+SORT_OPTION = NA will default to Popular. Otherwise can input to sort by:
+	-Popular
+	-Hishest Rating
+	-Lowest Rating
+	-Most Recent
+	-Oldest First
   

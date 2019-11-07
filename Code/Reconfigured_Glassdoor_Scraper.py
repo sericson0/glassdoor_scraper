@@ -7,6 +7,7 @@ import argparse
 import logging
 import logging.config
 from selenium import webdriver as wd
+from selenium.webdriver.support.ui import Select
 import selenium
 import numpy as np
 from schema import SCHEMA
@@ -29,7 +30,18 @@ LIMIT = 5
 USERNAME = ''
 PASSWORD = ''
 #headless means the web browser wont ope up
+
+
 HEADLESS = True
+#SORT_OPTION = NA will default to Popular. Otherwise can input to sort by:
+#		-Popular
+#		-Hishest Rating
+#		-Lowest Rating
+#		-Most Recent
+#		-Oldest First
+SORT_OPTION = "NA" 
+#					
+SORT_OPTION = "Most Recent"
 #_______________________________________________________________________________________________________________________________________
 #_______________________________________________________________________________________________________________________________________
 #_______________________________________________________________________________________________________________________________________
@@ -39,7 +51,7 @@ if PASSWORD == '':
 
 
 args = argparse.Namespace(credentials=None, headless=HEADLESS, limit=LIMIT, max_date=None, min_date=None, password=PASSWORD,
-                 start_from_url=True, username=USERNAME)
+                 start_from_url=True, username=USERNAME, sort_option=SORT_OPTION)
 
 
 logger = logging.getLogger(__name__)
@@ -297,7 +309,11 @@ def get_browser():
     return browser
 
 
-
+def sort_reviews(option):
+    selection_options = Select(browser.find_element_by_id("FilterSorts"))
+    selection_options.select_by_visible_text(option)
+    logger.info(f'Sorting Data By {args.sort_option}')
+    time.sleep(1)
 
 def get_company_reviews(company_name, company_number, csv_file_name):
     page[0] = 1
@@ -312,6 +328,9 @@ def get_company_reviews(company_name, company_number, csv_file_name):
     url = "https://www.glassdoor.com/Reviews/"+company_name.replace(" ","-")+"-Reviews-"+company_number
     browser.get(url+".htm")
     time.sleep(1)
+    if args.sort_option != "NA":
+        sort_reviews(args.sort_option)
+
 
     reviews_df = extract_from_page()
     res = res.append(reviews_df)
